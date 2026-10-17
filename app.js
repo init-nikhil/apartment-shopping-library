@@ -1,0 +1,19 @@
+const $=s=>document.querySelector(s),grid=$('#grid'),category=$('#category'),search=$('#search');
+let items=[],videos=[],ideas=[],section=location.hash==='#videos'?'videos':location.hash==='#find-later'?'ideas':'items';
+function node(tag,text,cls){const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n}
+function link(text,url){const a=node('a',text);a.href=url;a.target='_blank';a.rel='noopener noreferrer';return a}
+function card(item){
+ const article=node('article',undefined,'card'),photo=node('div',undefined,'photo');
+ if(item.store_photo_url){const img=node('img');img.src=item.store_photo_url;img.alt=item.name+' product photo';img.loading='lazy';img.referrerPolicy='no-referrer';img.onerror=()=>{img.remove();photo.append(link('See photos at the store ↗',item.url))};photo.append(img)}
+ else photo.append(link('See photos at the store ↗',item.url));
+ article.append(photo);const body=node('div',undefined,'body');body.append(node('p',item.category,'category'),node('h2',item.name));
+ if(item.notes)body.append(node('p',item.notes,'notes'));
+ const actions=node('div',undefined,'actions');actions.append(link('View at store ↗',item.url));
+ for(const url of item.purchase_links||[]){if(url!==item.url)actions.append(link('Another seller ↗',url))}
+ body.append(actions);article.append(body);return article;
+}
+function referenceCard(item,video=false){const article=node('article',undefined,'card'),photo=node('div',undefined,'photo');const image=item.image||item.thumbnail;if(image){const img=node('img');img.src=image;img.alt=item.name;img.loading='lazy';photo.append(img)}const body=node('div',undefined,'body');body.append(node('p',video?'Design video':item.category||'Picture reference','category'),node('h2',item.name));if(item.notes)body.append(node('p',item.notes,'notes'));const actions=node('div',undefined,'actions');if(video)actions.append(link('Watch on YouTube ↗',item.url));else{const product=items.find(p=>p.id===item.product_id);if(product)actions.append(link('Product found · View at store ↗',product.url));if(item.source_url)actions.append(link('Picture source ↗',item.source_url))}body.append(actions);article.append(photo,body);return article}
+function render(){const q=search.value.trim().toLowerCase(),c=category.value;const source=section==='videos'?videos:section==='ideas'?ideas:items;const shown=source.filter(i=>(section==='videos'||!c||i.category===c)&&[i.name,i.category,i.notes].join(' ').toLowerCase().includes(q));grid.replaceChildren(...shown.map(i=>section==='items'?card(i):referenceCard(i,section==='videos')));$('#summary').textContent=section==='items'?`${items.length} saved items · ${shown.length} shown`:section==='videos'?`${videos.length} saved design videos`:`${ideas.length} picture references`;
+ category.parentElement.hidden=section==='videos';document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('active',b.dataset.section===section));if(!shown.length)grid.append(node('p','No items match that search.','empty'))}
+document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{section=b.dataset.section;category.value='';search.value='';history.replaceState(null,'',section==='videos'?'#videos':section==='ideas'?'#find-later':'#library');render()});
+fetch('library.json').then(r=>{if(!r.ok)throw Error('Library could not be loaded.');return r.json()}).then(data=>{items=data.items||[];videos=data.videos||[];ideas=data.ideas||[];const categories=[...new Set(items.map(i=>i.category).filter(Boolean))].sort();for(const name of categories){const option=node('option',name);option.value=name;category.append(option)}category.onchange=render;search.oninput=render;render()}).catch(()=>{$('#summary').textContent='The shopping library could not be loaded.';grid.append(node('p','Please try opening the shared link again.','empty'))});

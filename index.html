@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A personal furniture and homewares shopping library.">
+  <title>Apartment / Shopping Library</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="./">APARTMENT<span>SHOPPING LIBRARY</span></a>
+    <p>A collection of pieces I’m considering.</p>
+  </header>
+  <main>
+    <section class="intro">
+      <p class="eyebrow">PERSONAL COLLECTION</p>
+      <h1>Things for home,<br>worth a closer look.</h1>
+      <p id="summary">Loading the shopping library…</p>
+    </section>
+    <nav class="sections" aria-label="Library sections"><button data-section="items" class="active">Shopping library</button><button data-section="videos">Videos</button><button data-section="ideas">Find later</button></nav>
+    <section class="toolbar" aria-label="Filter library">
+      <label>Category<select id="category"><option value="">All categories</option></select></label>
+      <label>Search<input id="search" type="search" placeholder="Search items…"></label>
+    </section>
+    <section id="grid" class="grid" aria-live="polite"></section>
+    <footer>Product photos and purchase links go to their original retailers. Availability and prices may change.</footer>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
